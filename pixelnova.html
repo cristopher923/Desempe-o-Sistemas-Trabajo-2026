@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>PixelNova · Tecnología para tu mundo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<style>
+:root{--bg:#faf7ff;--fg:#1b1340;--card:#fff;--mut:#6b6590;--bd:#e7e0f7;--pri:#7c3aed;--pink:#ff4d8d;--yel:#ffd23f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#120d2b;--fg:#f4f0ff;--card:#1c1540;--mut:#a79fd0;--bd:#33295f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#120d2b;--fg:#f4f0ff;--card:#1c1540;--mut:#a79fd0;--bd:#33295f;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--fg);font-family:'DM Sans',system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+h1,h2,h3,.f{font-family:'Bricolage Grotesque','DM Sans',system-ui,sans-serif}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:1.25rem}
+.mut{color:var(--mut)}
+.btn{background:var(--pri);color:#fff;font-weight:700;border-radius:999px;padding:.7rem 1.4rem;transition:.2s;display:inline-block;text-align:center;cursor:pointer}
+.btn:hover{background:var(--pink);transform:translateY(-2px)}
+.btn2{border:2px solid var(--pri);color:var(--pri);font-weight:700;border-radius:999px;padding:.6rem 1.3rem;display:inline-block;cursor:pointer}
+.btn2.on{background:var(--pri);color:#fff}
+input,select{background:var(--card);border:1px solid var(--bd);border-radius:.75rem;padding:.6rem .8rem;width:100%;color:var(--fg)}
+input[type=range],input[type=radio],input[type=checkbox]{width:auto;padding:0}
+.err{color:var(--pink);font-size:.8rem;display:block;min-height:1rem}
+.lift{transition:.2s}.lift:hover{transform:translateY(-4px)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WPNZ7M77" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<header class="sticky z-20" style="top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--bd)">
+<div class="max-w-6xl mx-auto px-4 h-16 flex items-center gap-3">
+<a href="#home" class="f text-xl sm:text-2xl font-extrabold" style="color:var(--pri)">Pixel<span style="color:var(--pink)">Nova</span></a>
+<form onsubmit="return srch(event)" class="flex-1 min-w-0 max-w-md"><input id="q" placeholder="Buscar productos…" aria-label="Buscar"></form>
+<nav class="ml-auto flex items-center gap-3 text-sm font-medium"><a href="#products" class="hidden sm:inline">Tienda</a><a id="ua" href="#login"></a><a href="#cart" class="relative text-xl" aria-label="Carrito">🛒<span id="cc" class="absolute -top-2 -right-3 text-xs font-bold text-white rounded-full px-1.5" style="background:var(--pink)"></span></a></nav></div></header>
+<main id="app" class="max-w-6xl mx-auto px-4 py-6 min-h-[70vh]"></main>
+<footer class="mt-10 py-10 px-4" style="background:var(--pri);color:#fff"><div class="max-w-6xl mx-auto grid sm:grid-cols-3 gap-6 text-sm">
+<div><p class="f text-2xl font-extrabold">PixelNova</p><p class="opacity-80 mt-2">Tienda demo de tecnología. Las compras son simuladas: no se realizan cobros reales.</p></div>
+<div><p class="font-bold mb-2">Explora</p><div class="flex flex-col gap-1 opacity-90"><a href="#products">Tienda</a><a href="#cart">Carrito</a><a href="#account">Mi cuenta</a></div></div>
+<div><p class="font-bold mb-2">Contacto</p><p class="opacity-90">hola@pixelnova.cl · Santiago, Chile</p><div class="flex gap-3 mt-2 opacity-90"><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a><a href="https://tiktok.com" target="_blank" rel="noopener">TikTok</a><a href="https://x.com" target="_blank" rel="noopener">X</a></div></div></div></footer>
+<div id="toast" class="fixed left-1/2 -translate-x-1/2 z-40 px-5 py-3 rounded-full font-bold text-sm hidden" style="bottom:calc(1.5rem + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg)"></div>
+<script>
+// ===== CONFIG =====
+const CFG={GTM_ID:'GTM-WPNZ7M77',GA_ID:'G-XXXXXXXXXX',WEBPAY_API:'',TEST:true,CURRENCY:'CLP'};
+// ===== Storage (con respaldo en memoria) =====
+const mem={},S={g(k,d){try{const v=localStorage.getItem('pn_'+k);if(v!==null)return JSON.parse(v)}catch(e){}return k in mem?mem[k]:d},s(k,v){mem[k]=v;try{localStorage.setItem('pn_'+k,JSON.stringify(v))}catch(e){}}};
+// ===== GA4 =====
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+const ECOM=['view_item','add_to_cart','begin_checkout','purchase'];
+if(CFG.GTM_ID){(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});const f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f)})(window,document,'script','dataLayer',CFG.GTM_ID)}
+else{gtag('js',new Date());gtag('config',CFG.GA_ID,{send_page_view:false,debug_mode:CFG.TEST});
+if(!CFG.GA_ID.includes('XXXX')){const s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+CFG.GA_ID;document.head.appendChild(s)}}
+const ev=(n,p)=>{
+if(CFG.GTM_ID){if(n==='page_view')dataLayer.push({event:'virtual_page_view',...p});else if(ECOM.includes(n)){dataLayer.push({ecommerce:null});dataLayer.push({event:n,transaction_type:p.transaction_type,ecommerce:p})}else dataLayer.push({event:n,...p})}
+else gtag('event',n,p);
+console.log('[GA4]',n,p)};
+const gi=(p,q=1,v)=>({item_id:'PN-'+p.id,item_name:p.n,item_category:p.c,item_variant:v,price:p.p,quantity:q});
+// ===== Datos demo (reemplazar por datos reales) =====
+const G={Audio:'#c4b5fd,#f9a8d4',Gaming:'#99f6e4,#a5b4fc',Smart:'#fde68a,#fca5a5'};
+const P=[
+[1,'Audífonos Nova ANC','Audio',59990,79990,14,'🎧','Audífonos inalámbricos con cancelación activa de ruido y 40 horas de batería.',['Violeta','Negro','Menta'],'hp'],
+[2,'Pixel Buds','Audio',29990,0,30,'🎵','Earbuds true wireless con estuche de carga y resistencia al agua IPX4.',['Blanco','Rosa'],'p'],
+[3,'Parlante Boom Mini','Audio',24990,34990,8,'🔊','Parlante bluetooth portátil con graves potentes y 12 horas de autonomía.',['Azul','Amarillo'],''],
+[4,'Micrófono Streamer USB','Audio',44990,0,5,'🎙️','Micrófono condensador USB con filtro anti-pop, ideal para streaming y podcasts.',['Negro'],'n'],
+[5,'Control Gamer Neo','Gaming',39990,0,22,'🎮','Control inalámbrico compatible con PC y consolas, con vibración háptica.',['Violeta','Rojo'],'p'],
+[6,'Teclado Mecánico RGB','Gaming',54990,69990,12,'⌨️','Teclado mecánico 75% con iluminación RGB personalizable y hot-swap.',['Switch rojo','Switch azul'],'h'],
+[7,'Mouse Ligero Z1','Gaming',27990,0,0,'🖱️','Mouse gamer de 58 g con sensor de 26.000 DPI.',['Negro','Blanco'],''],
+[8,'Monitor 24" 144 Hz','Gaming',189990,219990,6,'🖥️','Monitor Full HD con 144 Hz, 1 ms y panel IPS para jugar sin retrasos.',['Negro'],'n'],
+[9,'Smartwatch Fit Pulse','Smart',69990,89990,18,'⌚','Reloj inteligente con GPS, monitor cardíaco y 7 días de batería.',['Negro','Rosa','Menta'],'hp'],
+[10,'Ampolleta Smart WiFi','Smart',8990,0,50,'💡','Ampolleta LED controlable desde el celular, compatible con asistentes de voz.',['Cálida','RGB'],''],
+[11,'Cámara Seguridad Cam360','Smart',34990,0,11,'📷','Cámara WiFi 360° con visión nocturna y detección de movimiento.',['Blanco'],'n'],
+[12,'Power Bank 20.000 mAh','Smart',19990,24990,40,'🔋','Batería externa con carga rápida de 22,5 W y dos salidas USB.',['Negro','Azul'],'p']
+].map(r=>({id:r[0],n:r[1],c:r[2],p:r[3],old:r[4],s:r[5],e:r[6],d:r[7],v:r[8],f:r[9]}));
+const COM=['Santiago','Providencia','Las Condes','Ñuñoa','Maipú','La Florida','Puente Alto','Vitacura','San Miguel','Independencia'];
+const SEED=[{id:'PN-DEMO001',date:'12-10-2026',total:89980,email:'demo@pixelnova.cl',items:[{n:'Smartwatch Fit Pulse',q:1,v:'Negro',p:69990},{n:'Power Bank 20.000 mAh',q:1,v:'Azul',p:19990}],test:true}];
+// ===== Utilidades =====
+const $=s=>document.querySelector(s),app=$('#app');
+const money=n=>'$'+Math.round(n).toLocaleString('es-CL');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const find=id=>P.find(p=>p.id==id),go=h=>{location.hash=h};
+let cart=S.g('cart',[]),user=S.g('user',null),coupon=S.g('coupon',''),lim=6,F={q:'',c:'',max:250000,o:0,sort:'pop'},sel={v:null,q:1},order=null,last='';
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add('hidden'),2200)}
+function hdr(){const n=cart.reduce((a,l)=>a+l.q,0);$('#cc').textContent=n||'';$('#cc').style.display=n?'':'none';$('#ua').innerHTML=user?`<a href="#account">Hola, ${esc(user.nm.split(' ')[0])}</a>`:'<a href="#login">Ingresar</a>'}
+const sv=()=>{S.s('cart',cart);S.s('coupon',coupon);hdr()};
+const calc=()=>{const sub=cart.reduce((a,l)=>a+find(l.id).p*l.q,0),disc=coupon==='NOVA10'?Math.round(sub*.1):0;return{sub,disc,net:sub-disc,items:cart.map(l=>gi(find(l.id),l.q,l.v))}};
+const shipCost=(m,net)=>m==='ex'?6990:(net>=50000?0:3990);
+// ===== Componentes =====
+const badge=p=>p.old?`<span class="absolute top-3 left-3 text-white text-xs font-bold px-2 py-1 rounded-full" style="background:var(--pink)">-${Math.round(100-p.p/p.old*100)}%</span>`:p.f.includes('n')?`<span class="absolute top-3 left-3 text-xs font-bold px-2 py-1 rounded-full" style="background:var(--yel);color:#1b1340">Nuevo</span>`:'';
+const stk=p=>p.s<1?'<span class="text-xs font-bold" style="color:var(--pink)">Agotado</span>':p.s<=8?`<span class="text-xs font-bold" style="color:#d97706">¡Quedan ${p.s}!</span>`:'<span class="text-xs font-bold" style="color:#0d9488">En stock</span>';
+const card=p=>`<div class="card lift overflow-hidden flex flex-col"><a href="#product-${p.id}"><div class="h-36 sm:h-40 grid place-items-center text-6xl relative" style="background:linear-gradient(135deg,${G[p.c]})">${p.e}${badge(p)}</div></a><div class="p-3 sm:p-4 flex flex-col gap-1 flex-1"><p class="text-xs mut">${p.c}</p><a href="#product-${p.id}" class="font-bold leading-tight">${p.n}</a><p class="text-sm mut line-clamp-2">${p.d}</p><div class="flex items-baseline gap-2 mt-1 flex-wrap"><b class="text-lg">${money(p.p)}</b>${p.old?`<s class="text-xs mut">${money(p.old)}</s>`:''}</div><div class="flex items-center justify-between gap-2 mt-auto pt-2">${stk(p)}<button onclick="quick(${p.id})" ${p.s<1?'disabled':''} class="btn !py-1.5 !px-4 text-sm disabled:opacity-40">Agregar</button></div></div></div>`;
+const grid=a=>a.length?`<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">${a.map(card).join('')}</div>`:'<p class="mut py-10 text-center">No encontramos productos. Prueba quitando algún filtro.</p>';
+const fld=(id,l,t='text',v='')=>`<label class="block text-sm font-medium">${l}<input name="${id}" type="${t}" value="${esc(v)}" autocomplete="on"><span class="err" id="e_${id}"></span></label>`;
+// ===== Acciones carrito =====
+function add(id){const p=find(id);if(p.s<1)return;const q=Math.min(sel.q,p.s),l=cart.find(x=>x.id==id&&x.v==sel.v);if(l)l.q=Math.min(l.q+q,p.s);else cart.push({id,v:sel.v,q});sv();ev('add_to_cart',{currency:CFG.CURRENCY,value:p.p*q,items:[gi(p,q,sel.v)]});toast('Agregado al carrito ✨')}
+function quick(id){sel={v:find(id).v[0],q:1};add(id)}
+function qty(i,d){const l=cart[i];l.q=Math.max(1,Math.min(find(l.id).s,l.q+d));sv();route(1)}
+function rm(i){cart.splice(i,1);sv();route(1)}
+function cp(){const c=$('#cpn').value.trim().toUpperCase();if(c==='NOVA10'){coupon=c;toast('Cupón aplicado: 10% de descuento')}else toast('Cupón inválido');sv();route(1)}
+function srch(e){e.preventDefault();F.q=$('#q').value;lim=6;location.hash==='#products'?route(1):go('products');return false}
+// ===== Vistas =====
+const V={
+home(){const hot=P.filter(p=>p.f.includes('h')),pop=P.filter(p=>p.f.includes('p'));return`
+<section class="rounded-3xl p-6 sm:p-12 relative overflow-hidden text-white" style="background:linear-gradient(120deg,var(--pri),var(--pink))"><div class="max-w-xl relative z-10"><h1 class="text-4xl sm:text-6xl font-extrabold leading-tight">Tu setup, tu ritmo, tu mundo tech.</h1><p class="mt-4 text-lg opacity-90">Audio, gaming y smart home con despacho a todo Chile y hasta 12 cuotas simuladas.</p><div class="flex gap-3 mt-6 flex-wrap"><a href="#products" class="btn !bg-[#ffd23f] !text-[#1b1340]">Ver la tienda</a><a href="#cart" class="btn2 !border-white !text-white">Ir al carrito</a></div></div><div class="absolute -right-6 -bottom-8 text-[9rem] sm:text-[16rem] opacity-30 select-none">🎧</div></section>
+<h2 class="text-2xl font-extrabold mt-10 mb-4">Compra por categoría</h2><div class="grid grid-cols-3 gap-3">${Object.keys(G).map(c=>`<button onclick="F.c='${c}';lim=6;go('products')" class="rounded-2xl p-4 sm:p-8 text-center font-bold lift" style="background:linear-gradient(135deg,${G[c]});color:#1b1340"><div class="text-4xl sm:text-5xl">${{Audio:'🎧',Gaming:'🎮',Smart:'🏠'}[c]}</div>${c}</button>`).join('')}</div>
+<h2 class="text-2xl font-extrabold mt-10 mb-4">Destacados</h2>${grid(hot)}
+<div class="rounded-3xl p-6 sm:p-8 my-10 text-center" style="background:var(--yel);color:#1b1340"><h2 class="text-2xl sm:text-3xl font-extrabold">10% extra con el código NOVA10</h2><p class="mt-1">Úsalo en tu carrito. Válido en toda la tienda.</p><a href="#products" class="btn mt-4">Aprovechar oferta</a></div>
+<h2 class="text-2xl font-extrabold mb-4">Más vendidos</h2>${grid(pop)}
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-10">${[['🚚','Despacho a todo Chile','Gratis sobre $50.000'],['🔒','Pago protegido','Webpay Plus (modo prueba)'],['↩️','10 días de cambio','Sin preguntas'],['🛠️','Garantía oficial','6 a 12 meses']].map(b=>`<div class="card p-4 text-center"><div class="text-3xl">${b[0]}</div><b class="block mt-1">${b[1]}</b><span class="text-sm mut">${b[2]}</span></div>`).join('')}</div>`},
+products(){const a=list(),cats=Object.keys(G);return`<h1 class="text-3xl font-extrabold mb-4">Tienda</h1>
+<div class="card p-4 mb-5 grid sm:grid-cols-4 gap-3 items-end text-sm"><label>Categoría<select onchange="F.c=this.value;lim=6;route(1)"><option value="">Todas</option>${cats.map(c=>`<option ${F.c==c?'selected':''}>${c}</option>`).join('')}</select></label>
+<label>Precio hasta ${money(F.max)}<input type="range" min="10000" max="250000" step="5000" value="${F.max}" onchange="F.max=+this.value;lim=6;route(1)" class="w-full"></label>
+<label>Ordenar por<select onchange="F.sort=this.value;route(1)">${[['pop','Popularidad'],['new','Novedades'],['pa','Precio: menor a mayor'],['pd','Precio: mayor a menor']].map(o=>`<option value="${o[0]}" ${F.sort==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></label>
+<label class="flex gap-2 items-center pb-2"><input type="checkbox" ${F.o?'checked':''} onchange="F.o=this.checked?1:0;lim=6;route(1)"> Solo ofertas</label></div>
+${F.q?`<p class="mb-3 text-sm">Resultados para “${esc(F.q)}” <button class="underline" style="color:var(--pri)" onclick="F.q='';$('#q').value='';route(1)">Limpiar</button></p>`:''}
+<p class="text-sm mut mb-3">${a.length} productos</p>${grid(a.slice(0,lim))}${a.length>lim?'<div class="text-center mt-6"><button class="btn" onclick="lim+=6;route(1)">Cargar más</button></div>':''}`},
+product(id){const p=find(id);if(!p)return V.nf();const rel=P.filter(x=>x.c==p.c&&x.id!=p.id).slice(0,4);return`<a href="#products" class="text-sm mut">← Volver a la tienda</a>
+<div class="grid md:grid-cols-2 gap-8 mt-3"><div><div class="rounded-3xl h-72 sm:h-96 grid place-items-center text-[8rem] relative" style="background:linear-gradient(135deg,${G[p.c]})">${p.e}${badge(p)}</div><div class="grid grid-cols-3 gap-2 mt-2">${[0,1,2].map(i=>`<div class="rounded-2xl h-20 grid place-items-center text-4xl" style="background:linear-gradient(${135+i*60}deg,${G[p.c]})">${p.e}</div>`).join('')}</div></div>
+<div><p class="mut text-sm">${p.c} · SKU PN-${p.id}</p><h1 class="text-3xl font-extrabold">${p.n}</h1><div class="flex items-baseline gap-3 mt-2"><b class="text-3xl">${money(p.p)}</b>${p.old?`<s class="mut">${money(p.old)}</s>`:''}</div><p class="mt-3">${p.d}</p><div class="mt-3">${stk(p)}</div>
+<p class="font-bold mt-4 mb-2 text-sm">Variante: ${esc(sel.v)}</p><div class="flex gap-2 flex-wrap">${p.v.map(v=>`<button class="btn2 !py-1 !px-4 text-sm ${v==sel.v?'on':''}" onclick="sel.v=this.dataset.v;route(1)" data-v="${esc(v)}">${esc(v)}</button>`).join('')}</div>
+<div class="flex items-center gap-3 mt-5"><div class="card flex items-center rounded-full"><button class="px-4 py-2 text-xl" onclick="sel.q=Math.max(1,sel.q-1);route(1)">−</button><b class="w-6 text-center">${sel.q}</b><button class="px-4 py-2 text-xl" onclick="sel.q=Math.min(${p.s||1},sel.q+1);route(1)">+</button></div><button class="btn flex-1 disabled:opacity-40" ${p.s<1?'disabled':''} onclick="add(${p.id})">${p.s<1?'Sin stock':'Agregar al carrito'}</button></div>
+<div class="card p-4 mt-5 text-sm space-y-1"><p>🚚 Despacho estándar en 3-5 días hábiles ($3.990, gratis sobre $50.000) o exprés en 24-48 h ($6.990).</p><p>↩️ Cambios y devoluciones dentro de 10 días con boleta.</p><p>🔒 Pago con Webpay Plus (modo de prueba).</p></div></div></div>
+<h2 class="text-2xl font-extrabold mt-10 mb-4">También te puede gustar</h2>${grid(rel)}`},
+cart(){if(!cart.length)return`<div class="text-center py-16"><div class="text-6xl">🛒</div><h1 class="text-2xl font-extrabold mt-2">Tu carrito está vacío</h1><a href="#products" class="btn mt-4">Explorar productos</a></div>`;const c=calc();return`<h1 class="text-3xl font-extrabold mb-4">Carrito</h1><div class="grid md:grid-cols-3 gap-6"><div class="md:col-span-2 space-y-3">${cart.map((l,i)=>{const p=find(l.id);return`<div class="card p-3 flex gap-3 items-center"><a href="#product-${p.id}" class="w-20 h-20 rounded-2xl grid place-items-center text-4xl shrink-0" style="background:linear-gradient(135deg,${G[p.c]})">${p.e}</a><div class="flex-1 min-w-0"><b class="block truncate">${p.n}</b><span class="text-sm mut">${esc(l.v)} · ${money(p.p)}</span><div class="flex items-center gap-2 mt-1"><button class="btn2 !py-0 !px-3" onclick="qty(${i},-1)">−</button><b>${l.q}</b><button class="btn2 !py-0 !px-3" onclick="qty(${i},1)">+</button></div></div><div class="text-right"><b>${money(p.p*l.q)}</b><button class="block text-xs underline mt-2" style="color:var(--pink)" onclick="rm(${i})">Eliminar</button></div></div>`}).join('')}</div>
+<aside class="card p-5 h-fit space-y-2"><h2 class="font-extrabold text-lg">Resumen</h2><div class="flex gap-2"><input id="cpn" placeholder="Cupón (NOVA10)" value="${coupon}"><button class="btn2 !px-4" onclick="cp()">Aplicar</button></div><p class="flex justify-between"><span>Subtotal</span><span>${money(c.sub)}</span></p>${c.disc?`<p class="flex justify-between" style="color:#0d9488"><span>Descuento NOVA10</span><span>-${money(c.disc)}</span></p>`:''}<p class="flex justify-between text-sm mut"><span>Despacho</span><span>Se calcula en el checkout</span></p><p class="flex justify-between text-xl font-extrabold pt-2 border-t" style="border-color:var(--bd)"><span>Total</span><span>${money(c.net)}</span></p><button class="btn w-full" onclick="go('checkout')">Continuar al checkout</button></aside></div>`},
+checkout(){const c=calc(),u=user||{};return`<h1 class="text-3xl font-extrabold mb-4">Checkout</h1><form onsubmit="pay(event)" class="grid md:grid-cols-3 gap-6" novalidate><div class="md:col-span-2 space-y-4"><div class="card p-5 grid sm:grid-cols-2 gap-3"><h2 class="font-extrabold sm:col-span-2">Tus datos</h2>${fld('nm','Nombre','text',(u.nm||'').split(' ')[0])}${fld('ap','Apellido')}${fld('em','Correo electrónico','email',u.em||'')}${fld('tel','Teléfono (9 dígitos, ej. 912345678)','tel')}</div>
+<div class="card p-5 grid sm:grid-cols-2 gap-3"><h2 class="font-extrabold sm:col-span-2">Despacho</h2>${fld('dir','Dirección (calle y número)')}<label class="block text-sm font-medium">Comuna<select name="com"><option value="">Selecciona…</option>${COM.map(x=>`<option>${x}</option>`).join('')}</select><span class="err" id="e_com"></span></label>
+<label class="card p-3 flex gap-2 sm:col-span-2 text-sm"><input type="radio" name="sh" value="st" checked onchange="shp()"> Estándar 3-5 días · ${c.net>=50000?'Gratis':'$3.990'}</label><label class="card p-3 flex gap-2 sm:col-span-2 text-sm"><input type="radio" name="sh" value="ex" onchange="shp()"> Exprés 24-48 h · $6.990</label></div>
+<div class="card p-5"><h2 class="font-extrabold mb-2">Método de pago</h2><label class="flex gap-2 text-sm"><input type="radio" checked> Webpay Plus · débito, crédito y prepago (ambiente de integración, sin cobros reales)</label></div></div>
+<aside class="card p-5 h-fit space-y-2 text-sm"><h2 class="font-extrabold text-lg">Tu pedido</h2>${cart.map(l=>`<p class="flex justify-between gap-2"><span>${l.q}× ${find(l.id).n} (${esc(l.v)})</span><span>${money(find(l.id).p*l.q)}</span></p>`).join('')}<p class="flex justify-between border-t pt-2" style="border-color:var(--bd)"><span>Subtotal</span><span>${money(c.sub)}</span></p>${c.disc?`<p class="flex justify-between"><span>Descuento</span><span>-${money(c.disc)}</span></p>`:''}<p class="flex justify-between"><span>Despacho</span><span id="shv">${c.net>=50000?'Gratis':'$3.990'}</span></p><p class="flex justify-between text-xl font-extrabold"><span>Total</span><span id="tot">${money(c.net+shipCost('st',c.net))}</span></p><button class="btn w-full">Pagar con Webpay</button></aside></form>`},
+success(){const o=S.g('last',null);if(!o)return V.nf();return`<div class="text-center py-12 max-w-lg mx-auto"><div class="text-7xl">🎉</div><h1 class="text-3xl font-extrabold mt-2">¡Compra exitosa!</h1><p class="mt-2">Pedido <b>${o.id}</b> · Total ${money(o.total)}</p><p class="text-sm mut mt-1">Compra de prueba: no se realizó ningún cobro. Enviamos el detalle (simulado) a ${esc(o.email)}.</p><div class="flex gap-3 justify-center mt-6"><a href="#products" class="btn">Seguir comprando</a><a href="#account" class="btn2">Ver mis pedidos</a></div></div>`},
+login(){return authForm('Iniciar sesión','log(event)',fld('em','Correo electrónico','email')+fld('pw','Contraseña','password'),'<a href="#forgot" class="underline">¿Olvidaste tu contraseña?</a> · <a href="#register" class="underline">Crear cuenta</a><p class="mut mt-2">Demo: demo@pixelnova.cl / Demo1234</p>')},
+register(){return authForm('Crear cuenta','reg(event)',fld('nm','Nombre completo')+fld('em','Correo electrónico','email')+fld('pw','Contraseña (8+ caracteres, letras y números)','password'),'<a href="#login" class="underline">Ya tengo cuenta</a>')},
+forgot(){return authForm('Recuperar contraseña','fg(event)',fld('em','Correo electrónico','email'),'<a href="#login" class="underline">Volver a ingresar</a>')},
+account(){const os=S.g('orders',SEED).filter(o=>o.email===user.em);return`<h1 class="text-3xl font-extrabold">Mi cuenta</h1><div class="card p-5 mt-4"><p><b>${esc(user.nm)}</b></p><p class="mut text-sm">${esc(user.em)}</p><button class="btn2 mt-3" onclick="out()">Cerrar sesión</button></div><h2 class="text-xl font-extrabold mt-6 mb-3">Mis pedidos</h2>${os.length?os.map(o=>`<div class="card p-4 mb-3"><p class="flex justify-between"><b>${o.id}</b><span>${money(o.total)}</span></p><p class="text-sm mut">${o.date} · ${o.items.map(i=>`${i.q}× ${i.n}`).join(', ')} · pedido de prueba</p></div>`).join(''):'<p class="mut">Aún no tienes pedidos.</p>'}`},
+webpay(id){(async()=>{const pd=S.g('pending',null);try{if(id==='ok'&&pd){const r=await(await fetch(CFG.WEBPAY_API+'/webpay/status/'+pd.bo)).json();if(r.status==='AUTHORIZED'){order={f:pd.f};S.s('pending',null);done(1);return}}}catch(e){}toast('Pago no completado. Intenta de nuevo');go('checkout')})();return'<p class="py-16 text-center">Confirmando tu pago…</p>'},
+nf(){return'<div class="text-center py-16"><h1 class="text-2xl font-extrabold">No encontramos esa página</h1><a href="#home" class="btn mt-4">Ir al inicio</a></div>'}};
+const authForm=(t,fn,body,foot)=>`<div class="max-w-sm mx-auto card p-6"><h1 class="text-2xl font-extrabold mb-3">${t}</h1><form onsubmit="${fn}" class="space-y-2" novalidate>${body}<p class="err" id="am"></p><button class="btn w-full">${t}</button></form><p class="text-sm mt-4">${foot}</p></div>`;
+function list(){const a=P.filter(p=>(!F.c||p.c===F.c)&&p.p<=F.max&&(!F.o||p.old)&&(p.n+p.d+p.c).toLowerCase().includes(F.q.toLowerCase()));const k={pop:p=>-(p.f.includes('p')*2+p.f.includes('h')),pa:p=>p.p,pd:p=>-p.p,new:p=>-(p.f.includes('n')?1:0)}[F.sort];return a.sort((x,y)=>k(x)-k(y))}
+function shp(){const c=calc(),m=document.querySelector('[name=sh]:checked').value,s=shipCost(m,c.net);$('#shv').textContent=s?money(s):'Gratis';$('#tot').textContent=money(c.net+s)}
+// ===== Checkout + Webpay (simulado) =====
+function pay(e){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),er={};
+if(f.nm.trim().length<2)er.nm='Ingresa tu nombre';if(f.ap.trim().length<2)er.ap='Ingresa tu apellido';
+if(!/^\S+@\S+\.\S+$/.test(f.em.trim()))er.em='Correo inválido';if(!/^9\d{8}$/.test(f.tel.replace(/\s/g,'')))er.tel='Ingresa 9 dígitos, parte con 9';
+if(f.dir.trim().length<5)er.dir='Ingresa tu dirección';if(!f.com)er.com='Selecciona tu comuna';
+document.querySelectorAll('.err').forEach(x=>x.textContent='');for(const k in er)$('#e_'+k).textContent=er[k];
+if(Object.keys(er).length)return;order={f};const c=calc(),tot=c.net+shipCost(f.sh,c.net);
+if(CFG.WEBPAY_API){fetch(CFG.WEBPAY_API+'/webpay/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:tot})}).then(r=>r.json()).then(d=>{S.s('pending',{f,bo:d.buyOrder});const fm=document.createElement('form');fm.method='POST';fm.action=d.url;fm.innerHTML='<input type="hidden" name="token_ws" value="'+d.token+'">';document.body.appendChild(fm);fm.submit()}).catch(()=>wp(tot));return}
+wp(tot)}
+function wp(tot){const d=document.createElement('div');d.id='wp';d.className='fixed inset-0 z-50 grid place-items-center p-4';d.style.background='rgba(18,13,43,.75)';d.innerHTML=`<div class="card p-6 max-w-sm w-full text-center"><p class="text-xs mut">Webpay Plus · ambiente de integración (simulado)</p><p class="text-3xl font-extrabold my-2">${money(tot)}</p><p class="text-sm mut">Tarjeta de prueba: 4051 8856 0044 6623 · CVV 123 · RUT 11.111.111-1 · clave 123</p><button class="btn w-full mt-4" onclick="done(1)">Aprobar pago</button><button class="btn2 w-full mt-2" onclick="done(0)">Rechazar pago</button></div>`;document.body.appendChild(d)}
+function done(ok){const w=$('#wp');if(w)w.remove();if(!ok){toast('Pago rechazado (simulado). Intenta de nuevo');return}
+const c=calc(),sh=shipCost(order.f.sh,c.net),total=c.net+sh,id='PN-'+Date.now().toString(36).toUpperCase()+Math.floor(Math.random()*100),tx=S.g('tx',[]);
+if(tx.includes(id)||!cart.length)return;tx.push(id);S.s('tx',tx);
+const o={id,date:new Date().toLocaleDateString('es-CL'),total,email:order.f.em.trim().toLowerCase(),name:order.f.nm,items:cart.map(l=>({n:find(l.id).n,q:l.q,v:l.v,p:find(l.id).p})),test:true};
+ev('purchase',{transaction_id:id,currency:CFG.CURRENCY,value:total,shipping:sh,coupon:coupon||undefined,transaction_type:'test',items:c.items});
+const os=S.g('orders',SEED);os.unshift(o);S.s('orders',os);S.s('last',o);cart=[];coupon='';sv();go('success')}
+// ===== Autenticación demo (hash PBKDF2 con sal; solo para demostración) =====
+async function hash(pw,salt){const en=new TextEncoder(),k=await crypto.subtle.importKey('raw',en.encode(pw),'PBKDF2',false,['deriveBits']),b=await crypto.subtle.deriveBits({name:'PBKDF2',salt:en.encode(salt),iterations:100000,hash:'SHA-256'},k,256);return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const sess=u=>{user={nm:u.nm,em:u.em};S.s('user',user);hdr();go('account')};
+async function reg(e){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),u=S.g('users',[]),em=f.em.trim().toLowerCase();let m='';
+if(f.nm.trim().length<2)m='Ingresa tu nombre';else if(!/^\S+@\S+\.\S+$/.test(em))m='Correo inválido';else if(!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(f.pw))m='La contraseña necesita 8+ caracteres con letras y números';else if(u.some(x=>x.em===em))m='Ese correo ya está registrado';
+if(m){$('#am').textContent=m;return}const salt=crypto.randomUUID(),n={nm:f.nm.trim(),em,salt,h:await hash(f.pw,salt)};u.push(n);S.s('users',u);ev('sign_up',{method:'email'});sess(n)}
+async function log(e){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),em=f.em.trim().toLowerCase(),u=S.g('users',[]).find(x=>x.em===em);
+if(!u||await hash(f.pw,u.salt)!==u.h){$('#am').textContent='Correo o contraseña incorrectos';return}ev('login',{method:'email'});sess(u)}
+function fg(e){e.preventDefault();$('#am').style.color='#0d9488';$('#am').textContent='Si el correo existe, te enviaremos un enlace (simulado).'}
+function out(){user=null;S.s('user',null);hdr();go('home')}
+// ===== Router + page_view (una sola vez por navegación) =====
+const T={home:'Inicio',products:'Tienda',cart:'Carrito',checkout:'Checkout',success:'Compra exitosa',webpay:'Confirmando pago',login:'Ingresar',register:'Crear cuenta',forgot:'Recuperar contraseña',account:'Mi cuenta'};
+function route(re){const h=location.hash.slice(1)||'home',[r,id]=h.split('-');
+if(r==='account'&&!user)return go('login');if(r==='checkout'&&!cart.length)return go('cart');
+const p=r==='product'?find(id):null;if(!re&&p)sel={v:p.v[0],q:1};
+app.innerHTML=(V[r]||V.nf)(id);document.title=(p?p.n:T[r]||'No encontrada')+' · PixelNova';
+if(!re){window.scrollTo(0,0);if(h!==last){last=h;ev('page_view',{page_title:document.title,page_location:location.href});
+if(p)ev('view_item',{currency:CFG.CURRENCY,value:p.p,items:[gi(p)]});
+if(r==='checkout'){const c=calc();ev('begin_checkout',{currency:CFG.CURRENCY,value:c.net,coupon:coupon||undefined,items:c.items})}}}}
+addEventListener('hashchange',()=>route());
+(async()=>{try{const u=S.g('users',[]);if(!u.some(x=>x.em==='demo@pixelnova.cl')){const salt=crypto.randomUUID();u.push({nm:'Camila Demo',em:'demo@pixelnova.cl',salt,h:await hash('Demo1234',salt)});S.s('users',u)}}catch(e){}})();
+hdr();route();
+</script></body></html>
